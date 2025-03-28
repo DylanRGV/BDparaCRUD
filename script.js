@@ -5,6 +5,7 @@ const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 const form = document.getElementById("jugadorForm");
 const tabla = document.getElementById("tabla-jugadores");
 
+// Agregar nuevo jugador desde formulario
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -22,7 +23,7 @@ form.addEventListener("submit", async (e) => {
 
   const { error } = await supabase.from("base").insert([nuevoJugador]);
   if (error) {
-    console.error("Error al insertar:", error.message);
+    console.error("❌ Error al insertar:", error.message);
     return;
   }
 
@@ -30,11 +31,12 @@ form.addEventListener("submit", async (e) => {
   cargarJugadores();
 });
 
+// Cargar todos los jugadores y mostrarlos en la tabla
 async function cargarJugadores() {
   const { data, error } = await supabase.from("base").select("*");
 
   if (error) {
-    console.error("Error al cargar datos:", error.message);
+    console.error("❌ Error al cargar datos:", error.message);
     return;
   }
 
@@ -51,19 +53,40 @@ async function cargarJugadores() {
       <td>${j.final_obtenido}</td>
       <td>${j.tiempo_decision}</td>
       <td>${j.tiempo_mouse}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="eliminarJugador(${j.id})">Eliminar</button></td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="eliminarJugador(${j.id})">Eliminar</button>
+      </td>
     `;
     tabla.appendChild(fila);
   });
 }
 
+// Eliminar jugador por ID
 async function eliminarJugador(id) {
   const { error } = await supabase.from("base").delete().eq("id", id);
   if (error) {
-    console.error("Error al eliminar:", error.message);
+    console.error("❌ Error al eliminar:", error.message);
     return;
   }
   cargarJugadores();
 }
 
+// Inicial: cargar tabla al abrir la página
 cargarJugadores();
+
+// 🎯 ESCUCHAR EN TIEMPO REAL: Se activa si un nuevo jugador llega desde el juego
+supabase
+  .channel('jugadores-stream')
+  .on(
+    'postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'base'
+    },
+    (payload) => {
+      console.log('📥 Nuevo jugador insertado desde el juego:', payload.new);
+      cargarJugadores();
+    }
+  )
+  .subscribe();
