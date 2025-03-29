@@ -1,11 +1,11 @@
 const supabaseUrl = 'https://tdvdhqhvzwqyvezunwwh.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Tu anon key completa
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkdmRocWh2endxeXZlenVud3doIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDMxMjg0MTksImV4cCI6MjA1ODcwNDQxOX0.pZ1GzHfUjZ1i1LI5bLZhAa_rtQk82O-9xkRKbQeQkfc'; // Tu anon key completa
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 const form = document.getElementById("jugadorForm");
 const tabla = document.getElementById("tabla-jugadores");
 
-// 🟢 Agregar nuevo jugador desde formulario
+// Agregar nuevo jugador desde formulario
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
@@ -32,16 +32,16 @@ form?.addEventListener("submit", async (e) => {
   cargarJugadores();
 });
 
-// 🟡 Mostrar todos los jugadores
+// Mostrar todos los jugadores
 async function cargarJugadores() {
   const { data, error } = await supabase.from("Base").select("*");
 
   if (error) {
-    console.error("❌ Error al cargar datos:", error.message);
+    console.error("Error al cargar datos:", error.message);
     return;
   }
 
-  console.log("✅ Jugadores recibidos:", data); // DEBUG opcional
+  console.log("Jugadores recibidos:", data); // DEBUG opcional
 
   tabla.innerHTML = "";
 
@@ -63,20 +63,20 @@ async function cargarJugadores() {
   });
 }
 
-// 🔴 Eliminar jugador por ID
+// Eliminar jugador por ID
 async function eliminarJugador(id) {
   const { error } = await supabase.from("Base").delete().eq("id", id);
   if (error) {
-    console.error("❌ Error al eliminar:", error.message);
+    console.error("Error al eliminar:", error.message);
     return;
   }
   cargarJugadores();
 }
 
-// 🚀 Cargar datos al iniciar
+// Cargar datos al iniciar
 cargarJugadores();
 
-// 🔁 Realtime: actualizar si se inserta algo nuevo en Supabase
+// Realtime: actualizar si se inserta algo nuevo en Supabase
 supabase
   .channel("jugadores-stream")
   .on(
